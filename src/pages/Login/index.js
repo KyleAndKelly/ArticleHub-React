@@ -1,14 +1,26 @@
 import './index.scss'
 import React from 'react';
-import { Card,Button, Checkbox, Form, Input } from 'antd';
-
-const onFinish = (values) => {
-    console.log('Success:', values);
-  };
-  const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-  };
+import { Card,Button, Checkbox, Form, Input, message } from 'antd';
+import {useDispatch} from 'react-redux'
+import { fetchLogin } from '@/store/modules/user';
+import { useNavigate } from 'react-router-dom';
 const Login = () => {
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+    const onFinish = async (values) => {
+        try {
+            console.log('Success:', values);
+            await dispatch(fetchLogin(values)); 
+            navigate('/layout');
+            message.success('Login success');
+        } catch (error) {
+            console.error('Login failed:', error);
+            message.error('Login failed. Please check your credentials and try again.');
+        }
+    };
+    const onFinishFailed = (errorInfo) => {
+        console.log('Failed:', errorInfo);
+    };
     return  <div className="login">
 
     <Card
@@ -25,8 +37,7 @@ const Login = () => {
     validateTrigger={['onBlur']}
   >
   <Form.Item
-      label="Username"
-      name="username"
+      name="mobile"
       
       rules={[
         {
@@ -39,8 +50,7 @@ const Login = () => {
     </Form.Item>
 
     <Form.Item
-      label="Password"
-      name="password"
+      name="code"
       rules={[
         {
           required: true,
