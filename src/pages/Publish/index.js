@@ -14,10 +14,20 @@ import { Link } from 'react-router-dom'
 import './index.scss'
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; 
-  
+import { useEffect, useState } from 'react';
+import {getChannelsAPI} from '@/apis/article'
+
   const { Option } = Select
   
   const Publish = () => {
+    const [channels,setChannelList] = useState([])
+    useEffect(()=>{
+        async function getChannelList(){
+            const res = await getChannelsAPI()
+            setChannelList(res.data.channels)
+        }
+        getChannelList()
+    },[])
     return (
       <div className="publish">
         <Card
@@ -47,7 +57,11 @@ import 'react-quill/dist/quill.snow.css';
               rules={[{ required: true, message: 'Please select channel' }]}
             >
               <Select placeholder="Please select channel" style={{ width: 400 }}>
-                <Option value={0}>Recommend</Option>
+              {channels.map(item => (
+                    <Option key={item.id} value={item.id}>
+                    {item.name}
+                    </Option>
+              ))}
               </Select>
             </Form.Item>
             <Form.Item
@@ -59,7 +73,7 @@ import 'react-quill/dist/quill.snow.css';
             <ReactQuill
                     className="publish-quill"
                     theme="snow"
-                    placeholder="请输入文章内容"
+                    placeholder="Please input contents"
             />
 
             <Form.Item wrapperCol={{ offset: 4 }}>
