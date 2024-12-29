@@ -23,6 +23,17 @@ import {getChannelsAPI,submitArticleAPI} from '@/apis/article'
   
   const Publish = () => {
     const [channels,setChannelList] = useState([])
+    const [imageList, setImageList] = useState([])
+    const [imageType, setImageType] = useState(0)
+
+    const onTypeChange = (e) => {
+      console.log(e)
+      setImageType(e.target.value)
+    }
+    const onUploadChange = (info) => {
+        console.log(info.fileList)
+        setImageList(info.fileList)
+    }
     useEffect(()=>{
         async function getChannelList(){
             const res = await getChannelsAPI()
@@ -31,20 +42,22 @@ import {getChannelsAPI,submitArticleAPI} from '@/apis/article'
         getChannelList()
     },[])
     const onFinish = async (formValue) => {
-        console.log(formValue)
+        if (imageType !== imageList.length) 
+            return message.warning('pic type and pic number not match')
         const { channel_id, content, title } = formValue
         const params = {
           channel_id,
           content,
           title,
-          type: 1,
+          type: imageType,
           cover: {
-            type: 1,
-            images: []
+            type: imageType,
+            images: imageList.map(item => item.response.data.url)
           }
         }
+        console.log(imageList)
         await submitArticleAPI(params)
-        message.success('发布文章成功')
+        message.success('Submit Success!')
       }
     return (
       <div className="publish">
@@ -98,19 +111,24 @@ import {getChannelsAPI,submitArticleAPI} from '@/apis/article'
 
             <Form.Item label="Cover">
                 <Form.Item name="type">
-                    <Radio.Group>
+                    <Radio.Group onChange={onTypeChange}>
                     <Radio value={1}>1 pic</Radio>
                     <Radio value={3}>3 pic</Radio>
                     <Radio value={0}>No pic</Radio>
                     </Radio.Group>
                 </Form.Item>
-                <Upload
+                {imageType > 0 &&<Upload
+                    name="image"
                     listType="picture-card"
-                    showUploadList>
+                    showUploadList
+                    action={'http://geek.itheima.net/v1_0/upload'}
+                    onChange={onUploadChange}
+                    maxCount={imageType}
+                >
                     <div style={{ marginTop: 8 }}>
                         <PlusOutlined />
                     </div>
-                </Upload>
+                </Upload>}
             </Form.Item>
             <Form.Item wrapperCol={{ offset: 4 }}>
               <Space>
