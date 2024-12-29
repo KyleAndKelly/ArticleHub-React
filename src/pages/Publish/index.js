@@ -96,7 +96,22 @@ import {getChannelsAPI,submitArticleAPI} from '@/apis/article'
             </Form.Item>
 
 
-
+            <Form.Item label="Cover">
+                <Form.Item name="type">
+                    <Radio.Group>
+                    <Radio value={1}>1 pic</Radio>
+                    <Radio value={3}>3 pic</Radio>
+                    <Radio value={0}>No pic</Radio>
+                    </Radio.Group>
+                </Form.Item>
+                <Upload
+                    listType="picture-card"
+                    showUploadList>
+                    <div style={{ marginTop: 8 }}>
+                        <PlusOutlined />
+                    </div>
+                </Upload>
+            </Form.Item>
             <Form.Item wrapperCol={{ offset: 4 }}>
               <Space>
                 <Button size="large" type="primary" htmlType="submit" >
