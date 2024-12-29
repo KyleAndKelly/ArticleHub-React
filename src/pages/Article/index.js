@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
-import { Card, Breadcrumb, Form, Button, Radio, DatePicker, Select } from 'antd'
+import { Card, Breadcrumb, Form, Button, Radio, DatePicker, Select ,Popconfirm} from 'antd'
 import { Table, Tag, Space } from 'antd'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useEffect, useState } from 'react'
-import {getChannelsAPI,getArticleListAPI} from '@/apis/article'
+import {getChannelsAPI,getArticleListAPI,delArticleListAPI} from '@/apis/article'
+import { useNavigate } from 'react-router-dom';
 // import img404 from '@/assets/error.png'
 
 
@@ -11,6 +12,7 @@ const { Option } = Select
 const { RangePicker } = DatePicker
 
 const Article = () => {
+    const navigator = useNavigate()
     const [channels,setChannelList] = useState([])
     useEffect(()=>{
         async function getChannelList(){
@@ -84,13 +86,20 @@ const Article = () => {
           render: data => {
             return (
               <Space size="middle">
-                <Button type="primary" shape="circle" icon={<EditOutlined />} />
+                <Button type="primary" shape="circle" icon={<EditOutlined />}  onClick={() => navigator(`/publish?id=${data.id}`)}/>
+                <Popconfirm
+                title="Delte This?"
+                onConfirm={() => delArticle(data)}
+                okText="Yes"
+                cancelText="No"
+                >
                 <Button
-                  type="primary"
-                  danger
-                  shape="circle"
-                  icon={<DeleteOutlined />}
+                    type="primary"
+                    danger
+                    shape="circle"
+                    icon={<DeleteOutlined />}
                 />
+                </Popconfirm>
               </Space>
             )
           }
@@ -110,6 +119,32 @@ const Article = () => {
         title: 'wkwebview离线化加载h5资源解决方案'
     }
     ]
+    const onFinish = async (formValue) =>{
+        console.log(formValue)
+        const { channel_id, date, status } = formValue
+        const reqParams = {
+          ...params,
+          status,
+          channel_id,
+          begin_pubdate: date ? date[0].format('YYYY-MM-DD') : null,
+          end_pubdate: date ? date[1].format('YYYY-MM-DD') : null,   
+        }
+        setParams(reqParams)
+
+    }
+    const pageChange = (page) => {
+        setParams({
+          ...params,
+          page
+        })
+    }
+    const delArticle = async (data) => {
+        delArticleListAPI(data.id)
+        setParams({
+          page: 1,
+          per_page: 10
+        })
+    }
   return (
     <div>
       <Card
@@ -121,7 +156,8 @@ const Article = () => {
         }
         style={{ marginBottom: 20 }}
       >
-        <Form initialValues={{ status: '' }}>
+        <Form initialValues={{ status: '' }}
+        onFinish={onFinish}>
           <Form.Item label="Status" name="status">
             <Radio.Group>
               <Radio value={''}>All</Radio>
@@ -152,7 +188,12 @@ const Article = () => {
         </Form>
       </Card>
       <Card title={`Total ${article.count} Results:`}>
-        <Table rowKey="id" columns={columns} dataSource={article.list} />
+        <Table rowKey="id" columns={columns} dataSource={article.list} pagination={{
+            current: params.page,
+            pageSize: params.per_page,
+            onChange: pageChange,
+            total: article.count
+            }}/>
       </Card>
     </div>
   )

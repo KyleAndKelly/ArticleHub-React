@@ -16,6 +16,13 @@ export function getArticleListAPI(params){
     })
 }
 
+export function delArticleListAPI(id){
+    return request({
+        url:`v1_0/mp/articles/${id}`,
+        method:"DELETE",
+    })
+}
+
 export function submitArticleAPI(formdata){
     return request({
         url:'v1_0/mp/articles?draft=false',
