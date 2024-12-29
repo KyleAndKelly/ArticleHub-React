@@ -8,6 +8,14 @@ export function getChannelsAPI(){
     })
 }
 
+export function getArticleListAPI(params){
+    return request({
+        url:'v1_0/mp/articles',
+        method:"GET",
+        params
+    })
+}
+
 export function submitArticleAPI(formdata){
     return request({
         url:'v1_0/mp/articles?draft=false',

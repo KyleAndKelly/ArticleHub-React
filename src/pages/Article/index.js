@@ -3,7 +3,7 @@ import { Card, Breadcrumb, Form, Button, Radio, DatePicker, Select } from 'antd'
 import { Table, Tag, Space } from 'antd'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useEffect, useState } from 'react'
-import {getChannelsAPI} from '@/apis/article'
+import {getChannelsAPI,getArticleListAPI} from '@/apis/article'
 // import img404 from '@/assets/error.png'
 
 
@@ -19,6 +19,31 @@ const Article = () => {
         }
         getChannelList()
     },[])
+    const [article, setArticleList] = useState({
+        list: [],
+        count: 0
+    })
+    
+    const [params, setParams] = useState({
+      page: 1,
+      per_page: 4,
+      begin_pubdate: null,
+      end_pubdate: null,
+      status: null,
+      channel_id: null
+    })
+    
+    useEffect(() => {
+      async function fetchArticleList () {
+        const res = await getArticleListAPI(params)
+        const { results, total_count } = res.data
+        setArticleList({
+          list: results,
+          count: total_count
+        })
+      }
+      fetchArticleList()
+    }, [params])
     const columns = [
         {
           title: 'Cover',
@@ -126,8 +151,8 @@ const Article = () => {
           </Form.Item>
         </Form>
       </Card>
-      <Card title={`Results:`}>
-        <Table rowKey="id" columns={columns} dataSource={data} />
+      <Card title={`Total ${article.count} Results:`}>
+        <Table rowKey="id" columns={columns} dataSource={article.list} />
       </Card>
     </div>
   )
