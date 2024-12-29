@@ -9,7 +9,7 @@ import './index.scss'
 import { Outlet,useLoaderData,useLocation,useNavigate} from 'react-router-dom'
 import { useLocale } from 'antd/es/locale'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchUserInfo } from '@/store/modules/user'
+import { fetchUserInfo ,clearUserInfo} from '@/store/modules/user'
 import { useEffect } from 'react'
 const { Header, Sider } = Layout
 
@@ -37,12 +37,16 @@ const GeekLayout = () => {
     dispatch(fetchUserInfo())
   }, [dispatch])
   const name = useSelector(state => state.user.userInfo.name)
-
   const selectedKey = useLocation().pathname
-  const navigate = useNavigate()
+  const navigator = useNavigate()
   const menuClick = (route) => {
-    navigate(route.key)
+    navigator(route.key)
   }
+  const loginOut = () => {
+    dispatch(clearUserInfo())
+    navigator('/')
+  }
+
   return (
     <Layout>
       <Header className="header">
@@ -50,7 +54,7 @@ const GeekLayout = () => {
         <div className="user-info">
           <span className="user-name">{name}</span>
           <span className="user-logout">
-            <Popconfirm title="Quit?" okText="Quit" cancelText="取消">
+            <Popconfirm title="Quit?" okText="Quit" cancelText="取消" onConfirm={loginOut}>
               <LogoutOutlined /> Log out
             </Popconfirm>
           </span>

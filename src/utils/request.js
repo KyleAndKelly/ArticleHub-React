@@ -2,7 +2,8 @@
 //2. time expiration
 //3. interceptor
 import axios from 'axios'
-import { getToken } from './token'
+import { getToken ,removeToken} from './token'
+import {useNavigate} from 'react-router-dom'
 
 const request = axios.create({
     baseURL: 'https://geek.itheima.net',
@@ -25,6 +26,13 @@ request.interceptors.response.use((response)=> {
     console.log(response.data)
     return response.data
   }, (error)=> {
+    console.dir(error)
+    if (error.response.status === 401) {
+      removeToken()
+      const navigator = useNavigate()
+      navigator('/')
+      window.location.reload()
+    }
     return Promise.reject(error)
 })
 

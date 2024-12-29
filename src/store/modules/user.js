@@ -1,6 +1,6 @@
 import { request } from '@/utils';
 import {createSlice} from '@reduxjs/toolkit'
-import { setToken as _setToken,getToken } from '@/utils';
+import { setToken as _setToken,getToken ,removeToken} from '@/utils';
 
 const userStore = createSlice({
     name:'user',
@@ -15,11 +15,16 @@ const userStore = createSlice({
         },
         setUserInfo (state, action) {
             state.userInfo = action.payload
+        },
+        clearUserInfo(state){
+            state.token = ''
+            state.userInfo = {}
+            removeToken()
         }
     },
 });
 
-const { setToken, setUserInfo  } = userStore.actions
+const { setToken, setUserInfo ,clearUserInfo } = userStore.actions
 const userReducer = userStore.reducer
 
 const  fetchLogin = (loginForm) =>{
@@ -41,5 +46,5 @@ const fetchUserInfo = () => {
 
 
 
-export {setToken, fetchLogin,fetchUserInfo}
+export {setToken, fetchLogin,fetchUserInfo,clearUserInfo}
 export default userReducer;
