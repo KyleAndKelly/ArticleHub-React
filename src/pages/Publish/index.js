@@ -7,7 +7,8 @@ import {
     Input,
     Upload,
     Space,
-    Select
+    Select,
+    message
   } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
@@ -15,7 +16,8 @@ import './index.scss'
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; 
 import { useEffect, useState } from 'react';
-import {getChannelsAPI} from '@/apis/article'
+import {getChannelsAPI,submitArticleAPI} from '@/apis/article'
+
 
   const { Option } = Select
   
@@ -28,6 +30,22 @@ import {getChannelsAPI} from '@/apis/article'
         }
         getChannelList()
     },[])
+    const onFinish = async (formValue) => {
+        console.log(formValue)
+        const { channel_id, content, title } = formValue
+        const params = {
+          channel_id,
+          content,
+          title,
+          type: 1,
+          cover: {
+            type: 1,
+            images: []
+          }
+        }
+        await submitArticleAPI(params)
+        message.success('发布文章成功')
+      }
     return (
       <div className="publish">
         <Card
@@ -43,6 +61,7 @@ import {getChannelsAPI} from '@/apis/article'
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 16 }}
             initialValues={{ type: 1 }}
+            onFinish={onFinish}
           >
             <Form.Item
               label="Title"
@@ -68,17 +87,19 @@ import {getChannelsAPI} from '@/apis/article'
               label="Content"
               name="content"
               rules={[{ required: true, message: 'Please input contents' }]}
-            ></Form.Item>
-
+            >
             <ReactQuill
                     className="publish-quill"
                     theme="snow"
                     placeholder="Please input contents"
             />
+            </Form.Item>
+
+
 
             <Form.Item wrapperCol={{ offset: 4 }}>
               <Space>
-                <Button size="large" type="primary" htmlType="submit">
+                <Button size="large" type="primary" htmlType="submit" >
                   Submit
                 </Button>
               </Space>
