@@ -11,17 +11,18 @@ import {
     message
   } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
-import { Link } from 'react-router-dom'
+import { Link ,data,useSearchParams,useNavigate } from 'react-router-dom'
 import './index.scss'
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; 
 import { useEffect, useState } from 'react';
-import {getChannelsAPI,submitArticleAPI} from '@/apis/article'
+import {getArticleByIdAPI, getChannelsAPI,submitArticleAPI,editArticleAPI} from '@/apis/article'
 
 
   const { Option } = Select
   
   const Publish = () => {
+    const navigator = useNavigate()
     const [channels,setChannelList] = useState([])
     const [imageList, setImageList] = useState([])
     const [imageType, setImageType] = useState(0)
@@ -52,20 +53,55 @@ import {getChannelsAPI,submitArticleAPI} from '@/apis/article'
           type: imageType,
           cover: {
             type: imageType,
-            images: imageList.map(item => item.response.data.url)
+            images: imageList.map(item => {
+              if (item.response) {
+                return item.response.data.url
+              } else {
+                return item.url
+              }
+            }
+            )
           }
         }
         console.log(imageList)
-        await submitArticleAPI(params)
-        message.success('Submit Success!')
+        if (articleId) {
+          await editArticleAPI({...params,id:articleId})
+          message.success('Edit Success!')
+          navigator('/layout/article')
+        }else {
+          await submitArticleAPI(params)
+          message.success('Submit Success!')
+        }
+
+       
       }
+    const [searchParams] = useSearchParams()
+    const articleId = searchParams.get('id')
+    const [form] = Form.useForm()
+    useEffect(()=>{
+      async function getArticle(){
+          const res = await getArticleByIdAPI(articleId)
+          console.log(res.data)
+          const {cover,...formVal} = res.data
+          form.setFieldsValue({
+            ...formVal,
+            type:cover.type
+          })
+          setImageType(cover.type)
+          setImageList(cover.images.map( url =>({ url })))
+
+      }
+      if (articleId) {
+        getArticle()
+      }
+    },[articleId,form])  
     return (
       <div className="publish">
         <Card
           title={
             <Breadcrumb items={[
-              { title: <Link to={'/'}>首页</Link> },
-              { title: '发布文章' },
+              { title: <Link to={'/'}>Home</Link> },
+              { title: `${articleId ? 'Edit' : 'Publish'}` },
             ]}
             />
           }
@@ -75,6 +111,7 @@ import {getChannelsAPI,submitArticleAPI} from '@/apis/article'
             wrapperCol={{ span: 16 }}
             initialValues={{ type: 1 }}
             onFinish={onFinish}
+            form= {form}
           >
             <Form.Item
               label="Title"
@@ -124,6 +161,7 @@ import {getChannelsAPI,submitArticleAPI} from '@/apis/article'
                     action={'http://geek.itheima.net/v1_0/upload'}
                     onChange={onUploadChange}
                     maxCount={imageType}
+                    fileList = {imageList}
                 >
                     <div style={{ marginTop: 8 }}>
                         <PlusOutlined />
